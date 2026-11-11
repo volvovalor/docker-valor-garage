@@ -24,3 +24,7 @@ docker compose up --build
 ```
 
 The database and photos persist in `./data`.
+
+# Todo
+
+- [ ] Favicon
