@@ -5,6 +5,8 @@
 import Link from "next/link";
 // import { listCars, listProjects } from "@/db/queries";
 
+
+// MAIN FUNCTION
 export default async function FrontPage() {
   // Query live garage stats from SQLite
   // const cars = await listCars(true);
@@ -323,4 +325,5 @@ export default async function FrontPage() {
       </footer>
     </div>
   );
+  
 }
