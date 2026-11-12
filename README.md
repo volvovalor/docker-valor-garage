@@ -28,3 +28,4 @@ The database and photos persist in `./data`.
 # Todo
 
 - [ ] Favicon
+- [ ] globals.css: seperate global styling and styling for elements, pages
