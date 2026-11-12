@@ -5,3 +5,4 @@
 ## Contents
 
 - **AppShell.tsx**: Provides a consistent layout for the application, including a header, main content area, and footer.
+- **ui.tsx**: Contains various UI components such as buttons, inputs, and other interactive elements that can be used across the application.
