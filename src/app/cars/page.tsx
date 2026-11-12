@@ -3,13 +3,27 @@
 
 // IMPORTS
 import Link from "next/link";
+import { Suspense } from "react";
 import { listCars, listPhotos, coverUrl } from "@/db/queries";
 import { Badge, Button, Card } from "@/components/ui";
 import { PageHero } from "@/components/PageHero";
 
 
 // MAIN FUNCTION
-export default async function FleetPage({
+export default function FleetPage({ searchParams }: {
+  searchParams: Promise<{ archived?: string | string[] }>;
+}) {
+  return (
+    <Suspense fallback={<FleetFallback />}>
+      <FleetContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+
+// FLEET CONTENT
+// Fetches the fleet data and renders the page content.
+async function FleetContent({
   searchParams,
 }: {
   searchParams: Promise<{ archived?: string | string[] }>;
@@ -100,6 +114,25 @@ export default async function FleetPage({
         </div>
       )}
 
+    </div>
+  );
+}
+
+
+// FLEET FALLBACK
+// Displays a loading state while the fleet data is being fetched.
+function FleetFallback() {
+  return (
+    <div>
+      <PageHero
+        imageSrc="/images/bg-fleet.jpg"
+        imageAlt="Classic car fleet lineup"
+        title="Fleet Bay"
+        subtitle="Profiles, jobs, and wiring for the cars you actually wrench on."
+      />
+      <Card className="py-16 text-center">
+        <p className="text-sm text-muted" role="status">Loading fleet...</p>
+      </Card>
     </div>
   );
 }
