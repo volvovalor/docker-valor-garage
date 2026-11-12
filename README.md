@@ -62,5 +62,8 @@ The database and photos persist in `./data`.
 
 # Todo
 
-- [ ] Favicon
+- [ ] Favicon more in theme of application
 - [ ] globals.css: seperate global styling and styling for elements, pages
+- [ ] Homepage: hero image is a default one up until there is at least one photo available inside any gallery, make the hero image random too each time loading the front page
+- [ ] actions/cars: Has a "parts" function but this could eventually be another type of object
+- [ ] Convert into docker image
