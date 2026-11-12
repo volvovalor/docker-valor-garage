@@ -1,31 +1,106 @@
+// AppShell Component
+// Wraps the header, main content area, and footer.
+
 "use client";
 
 // IMPORTS
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+
+// MAIN FUNCTION
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isLanding = pathname === "/";
 
+
+
+  // Case: Homepage
+  // Style: Fullscreen container without sidebar for the landing page
+  if (isLanding) {
+    return <main className="min-h-screen w-full">{children}</main>;
+  }
+
+
+
+  // Case: Other pages
+  // Style: Sidebar navigation with main content area
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="text-xl font-bold">
-            My App
+    <div className="flex min-h-full">
+
+      {/* Sidebar */}
+      <aside className="sticky top-0 flex h-screen w-56 shrink-0 flex-col border-r border-border bg-surface/90 backdrop-blur-xl px-4 py-6">
+        <Link href="/" className="group mb-8 block px-1">
+          <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-accent transition group-hover:text-accent-strong">
+            Valor
+          </div>
+          <div className="font-semibold tracking-tight text-foreground transition group-hover:text-accent">
+            Garage
+          </div>
+        </Link>
+
+        {/* Navigation links */}
+        <nav className="flex flex-col gap-1 text-sm">
+          <NavLink
+            href="/cars"
+            active={pathname === "/cars" || (pathname.startsWith("/cars/") && pathname !== "/cars/new")}
+          >
+            Fleet
+          </NavLink>
+          <NavLink href="/jobs" active={pathname.startsWith("/jobs")}>
+            Jobs
+          </NavLink>
+          <NavLink href="/cars/new" active={pathname === "/cars/new"}>
+            Add car
+          </NavLink>
+        </nav>
+
+        {/* Footer */}
+        <div className="mt-auto px-1 pt-6 border-t border-border/40">
+          <Link
+            href="/"
+            className="mb-2 inline-flex items-center gap-1.5 text-[11px] text-muted transition hover:text-accent"
+          >
+            <span>←</span> Front page
           </Link>
-        </div>
-      </header>
-      <main className="flex-1 container mx-auto px-4 py-8">
-        {children}
-      </main>
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-6">
-        <div className="container mx-auto px-4">
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} My App. All rights reserved.
+          <p className="text-[11px] leading-relaxed text-muted">
+            Hobby fleet notes, builds, and wiring — kept local.
           </p>
         </div>
-      </footer>
+      </aside>
+
+
+      {/* Main content area */}
+      <div className="min-w-0 flex-1">
+        <div className="mx-auto w-full max-w-7xl px-6 py-8">{children}</div>
+      </div>
+
+
     </div>
+  );
+}
+
+
+// NAVLINK COMPONENT
+function NavLink({
+  href,
+  active,
+  children,
+}: {
+  href: string;
+  active?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-lg px-2 py-1.5 text-sm transition ${
+        active
+          ? "bg-surface-2 font-medium text-accent"
+          : "text-muted hover:bg-surface-2 hover:text-foreground"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }
