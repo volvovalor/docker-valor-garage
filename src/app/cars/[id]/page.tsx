@@ -1,6 +1,7 @@
 // CAR DETAIL PAGE
 
 // IMPORTS
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { archiveCar, deleteCar, restoreCar } from "@/actions/cars";
@@ -11,7 +12,18 @@ import { getCar, listPhotos, coverUrl } from "@/db/queries";
 
 
 // MAIN FUNCTION
-export default async function CarOverviewPage({ params }: { params: Promise<{ id: string }> }) {
+export default function CarOverviewPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<CarOverviewFallback />}>
+      <CarOverviewContent params={params} />
+    </Suspense>
+  );
+}
+
+
+// CAR OVERVIEW CONTENT
+// Loads and renders the selected vehicle after route params resolve.
+async function CarOverviewContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const car = await getCar(id);
   if (!car) notFound();
@@ -140,6 +152,25 @@ export default async function CarOverviewPage({ params }: { params: Promise<{ id
           </form>
         </div>
       </div>
+    </div>
+  );
+}
+
+
+// CAR OVERVIEW FALLBACK
+// Displays a loading state while the vehicle profile is being fetched.
+function CarOverviewFallback() {
+  return (
+    <div>
+      <PageHero
+        imageSrc="/images/bg-car-detail.jpg"
+        imageAlt="Vehicle profile"
+        title="Vehicle Profile"
+        subtitle="Loading vehicle details..."
+      />
+      <Card className="py-16 text-center">
+        <p className="text-sm text-muted" role="status">Loading vehicle...</p>
+      </Card>
     </div>
   );
 }
