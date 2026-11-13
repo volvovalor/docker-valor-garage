@@ -1,3 +1,8 @@
+// Photos Page
+// Displays a gallery of photos for a specific car, allowing users to upload, caption, set cover, and delete photos.
+
+
+// IMPORTS
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { deletePhoto, setCoverPhoto, updatePhotoCaption, uploadPhotos } from "@/actions/photos";
