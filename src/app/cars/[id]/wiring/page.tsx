@@ -2,6 +2,7 @@
 // Displays a list of wiring diagrams for a specific car, allowing users to create new diagrams and view existing ones.
 
 // IMPORTS
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createDiagram } from "@/actions/diagrams";
@@ -12,7 +13,18 @@ import { getCar, listDiagrams } from "@/db/queries";
 
 
 // MAIN FUNCTION
-export default async function WiringIndexPage({ params }: { params: Promise<{ id: string }> }) {
+export default function WiringIndexPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<WiringFallback />}>
+      <WiringContent params={params} />
+    </Suspense>
+  );
+}
+
+
+// WIRING CONTENT
+// Loads and renders a vehicle's diagrams after route params resolve.
+async function WiringContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const car = await getCar(id);
   if (!car) notFound();
@@ -90,6 +102,25 @@ export default async function WiringIndexPage({ params }: { params: Promise<{ id
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+
+// WIRING FALLBACK
+// Displays a loading state while the vehicle's diagrams are being fetched.
+function WiringFallback() {
+  return (
+    <div>
+      <PageHero
+        imageSrc="/images/bg-wiring.jpg"
+        imageAlt="Automotive wiring harness blueprint"
+        title="Wiring Studio"
+        subtitle="Organize harnesses and wiring diagrams for this vehicle."
+      />
+      <Card className="py-16 text-center">
+        <p className="text-sm text-muted" role="status">Loading diagrams...</p>
+      </Card>
     </div>
   );
 }

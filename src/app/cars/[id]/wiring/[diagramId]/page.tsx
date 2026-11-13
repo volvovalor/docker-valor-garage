@@ -19,7 +19,22 @@ import { EMPTY_FLOW } from "@/lib/types";
 
 
 // MAIN FUNCTION
-export default async function DiagramPage({
+export default function DiagramPage({
+  params,
+}: {
+  params: Promise<{ id: string; diagramId: string }>;
+}) {
+  return (
+    <Suspense fallback={<DiagramFallback />}>
+      <DiagramContent params={params} />
+    </Suspense>
+  );
+}
+
+
+// DIAGRAM CONTENT
+// Loads and renders the selected diagram after route params resolve.
+async function DiagramContent({
   params,
 }: {
   params: Promise<{ id: string; diagramId: string }>;
@@ -105,6 +120,17 @@ export default async function DiagramPage({
         backgroundUrl={backgroundUrl}
         diagrams={diagrams.map((d) => ({ id: d.id, title: d.title }))}
       />
+    </div>
+  );
+}
+
+
+// DIAGRAM FALLBACK
+// Displays a loading state while the diagram is being fetched.
+function DiagramFallback() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center text-sm text-muted" role="status">
+      Loading wiring diagram...
     </div>
   );
 }
