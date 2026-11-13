@@ -3,6 +3,7 @@
 
 // IMPORTS
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createProject } from "@/actions/projects";
@@ -15,7 +16,24 @@ import { JOB_STATUSES, PROJECT_CATEGORIES } from "@/lib/types";
 
 
 // MAIN FUNCTION
-export default async function JobsPage({
+export default function JobsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ category?: string | string[]; status?: string | string[] }>;
+}) {
+  return (
+    <Suspense fallback={<JobsFallback />}>
+      <JobsContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+
+// JOBS CONTENT
+// Loads the selected vehicle and filtered projects after URL params resolve.
+async function JobsContent({
   params,
   searchParams,
 }: {
@@ -159,6 +177,25 @@ export default async function JobsPage({
           ))
         )}
       </div>
+    </div>
+  );
+}
+
+
+// JOBS FALLBACK
+// Displays a loading state while the vehicle's jobs are being fetched.
+function JobsFallback() {
+  return (
+    <div>
+      <PageHero
+        imageSrc="/images/bg-jobs.jpg"
+        imageAlt="Workshop tools"
+        title="Jobs & Projects"
+        subtitle="Track maintenance, builds, and upgrades for this vehicle."
+      />
+      <Card className="py-16 text-center">
+        <p className="text-sm text-muted" role="status">Loading jobs...</p>
+      </Card>
     </div>
   );
 }
