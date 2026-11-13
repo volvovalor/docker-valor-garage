@@ -1,12 +1,29 @@
 // CAR DETAIL (layout)
 
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getCar } from "@/db/queries";
 
 
 // MAIN FUNCTION
-export default async function CarLayout({
+export default function CarLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: Promise<{ id: string }>;
+}) {
+  return (
+    <Suspense fallback={<div className="min-h-[40vh]" role="status">Loading vehicle...</div>}>
+      <CarLayoutContent params={params}>{children}</CarLayoutContent>
+    </Suspense>
+  );
+}
+
+
+// CAR LAYOUT CONTENT
+// Resolves the vehicle before rendering its detail routes.
+async function CarLayoutContent({
   children,
   params,
 }: {

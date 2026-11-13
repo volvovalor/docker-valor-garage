@@ -2,7 +2,7 @@
 // Displays the details of a specific job, including its tasks and status.
 
 // IMPORTS
-import type { ReactNode } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteProject, updateProject } from "@/actions/projects";
@@ -15,7 +15,22 @@ import { JOB_STATUSES, PROJECT_CATEGORIES } from "@/lib/types";
 
 
 // MAIN FUNCTION
-export default async function ProjectPage({
+export default function ProjectPage({
+  params,
+}: {
+  params: Promise<{ id: string; projectId: string }>;
+}) {
+  return (
+    <Suspense fallback={<ProjectFallback />}>
+      <ProjectContent params={params} />
+    </Suspense>
+  );
+}
+
+
+// PROJECT CONTENT
+// Loads and renders the selected job after route params resolve.
+async function ProjectContent({
   params,
 }: {
   params: Promise<{ id: string; projectId: string }>;
@@ -113,6 +128,25 @@ export default async function ProjectPage({
           </form>
         </Card>
       </div>
+    </div>
+  );
+}
+
+
+// PROJECT FALLBACK
+// Displays a loading state while the project details are being fetched.
+function ProjectFallback() {
+  return (
+    <div>
+      <PageHero
+        imageSrc="/images/bg-jobs.jpg"
+        imageAlt="Workshop tools and project board"
+        title="Job Details"
+        subtitle="Loading project details..."
+      />
+      <Card className="py-16 text-center">
+        <p className="text-sm text-muted" role="status">Loading job...</p>
+      </Card>
     </div>
   );
 }
