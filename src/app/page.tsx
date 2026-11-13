@@ -3,15 +3,15 @@
 
 // IMPORTS
 import Link from "next/link";
-// import { listCars, listProjects } from "@/db/queries";
+import { listCars, listProjects } from "@/db/queries";
 
 
 // MAIN FUNCTION
 export default async function FrontPage() {
   // Query live garage stats from SQLite
-  // const cars = await listCars(true);
-  // const projects = await listProjects();
-  // const activeProjects = projects.filter((p) => p.status === "in_progress");
+  const cars = await listCars(true);
+  const projects = await listProjects();
+  const activeProjects = projects.filter((p) => p.status === "in_progress");
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-background select-none">
@@ -222,21 +222,21 @@ export default async function FrontPage() {
           <div className="animate-fade-in-up delay-400 mt-10 flex flex-wrap items-center justify-center gap-8 border-t border-border/40 pt-6 text-xs text-muted font-mono">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground text-sm">
-                {/* {cars.length} */}
+                {cars.length}
               </span>
-              {/* <span>{cars.length === 1 ? "Vehicle" : "Vehicles"} Docked</span> */}
+              <span>{cars.length === 1 ? "Vehicle" : "Vehicles"} Docked</span>
             </div>
             <div className="h-3 w-px bg-border/60" />
             <div className="flex items-center gap-2">
               <span className="font-semibold text-accent text-sm">
-                {/* {activeProjects.length} */}
+                {activeProjects.length}
               </span>
-              {/* <span>Active {activeProjects.length === 1 ? "Job" : "Jobs"}</span> */}
+              <span>Active {activeProjects.length === 1 ? "Job" : "Jobs"}</span>
             </div>
             <div className="h-3 w-px bg-border/60" />
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground text-sm">
-                {/* {projects.length} */}
+                {projects.length}
               </span>
               <span>Total Projects</span>
             </div>
