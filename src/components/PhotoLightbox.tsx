@@ -44,6 +44,7 @@ export function PhotoLightboxProvider({
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const isOpen = activeIndex !== null;
   const activePhoto = activeIndex === null ? null : photos[activeIndex];
+  const navigationVerticalBounds = activePhoto?.type === "video" ? "top-0 bottom-16" : "inset-y-0";
 
   useEffect(() => {
     if (!isOpen) {
@@ -149,7 +150,7 @@ export function PhotoLightboxProvider({
                   aria-label="Previous photo"
                   title="Previous photo"
                   onClick={showPrevious}
-                  className="absolute inset-y-0 left-0 flex w-1/5 items-center justify-center text-white opacity-100 transition sm:opacity-0 sm:hover:bg-white/5 sm:hover:opacity-100 focus-visible:opacity-100"
+                  className={`absolute ${navigationVerticalBounds} left-0 flex w-1/5 items-center justify-center text-white opacity-100 transition sm:opacity-0 sm:hover:bg-white/5 sm:hover:opacity-100 focus-visible:opacity-100`}
                 >
                   <Chevron direction="left" />
                 </button>
@@ -158,7 +159,7 @@ export function PhotoLightboxProvider({
                   aria-label="Next photo"
                   title="Next photo"
                   onClick={showNext}
-                  className="absolute inset-y-0 right-0 flex w-1/5 items-center justify-center text-white opacity-100 transition sm:opacity-0 sm:hover:bg-white/5 sm:hover:opacity-100 focus-visible:opacity-100"
+                  className={`absolute ${navigationVerticalBounds} right-0 flex w-1/5 items-center justify-center text-white opacity-100 transition sm:opacity-0 sm:hover:bg-white/5 sm:hover:opacity-100 focus-visible:opacity-100`}
                 >
                   <Chevron direction="right" />
                 </button>
