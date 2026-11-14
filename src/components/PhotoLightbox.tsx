@@ -13,7 +13,6 @@ import {
   type ReactNode,
 } from "react";
 
-
 // PhotoLightboxItem Interface
 // Represents a single photo in the lightbox, including its source, alt text, caption, and optional detail.
 export interface PhotoLightboxItem {
@@ -25,9 +24,22 @@ export interface PhotoLightboxItem {
   poster?: string;
 }
 
-
+// Context and Types
 type OpenPhoto = (index: number, trigger: HTMLButtonElement) => void;
-const PhotoLightboxContext = createContext<OpenPhoto | null>(null);
+type SlideshowOptions = {
+  delaySeconds: number;
+  order: "chronological" | "shuffled";
+  transition: "fade" | "slide" | "zoom";
+};
+type PhotoLightboxContextValue = {
+  openPhoto: OpenPhoto;
+  startSlideshow: (options: SlideshowOptions, trigger: HTMLButtonElement) => void;
+};
+type SlideshowState = SlideshowOptions & {
+  sequence: number[];
+  playing: boolean;
+};
+const PhotoLightboxContext = createContext<PhotoLightboxContextValue | null>(null);
 
 
 // PhotoLightboxProvider Component
@@ -40,6 +52,7 @@ export function PhotoLightboxProvider({
   children: ReactNode;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [slideshow, setSlideshow] = useState<SlideshowState | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLButtonElement | null>(null);
   const isOpen = activeIndex !== null;
@@ -60,20 +73,36 @@ export function PhotoLightboxProvider({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!slideshow?.playing) return;
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((currentIndex) => {
+        const currentPosition = slideshow.sequence.indexOf(currentIndex ?? -1);
+        return slideshow.sequence[(currentPosition + 1) % slideshow.sequence.length];
+      });
+    }, slideshow.delaySeconds * 1000);
+
+    return () => window.clearInterval(timer);
+  }, [slideshow]);
+
 
   // Show Previous
   // Moves to the previous photo in the lightbox, wrapping around to the last photo if at the beginning.
   function showPrevious() {
+    const sequence = slideshow?.sequence ?? photos.map((_, index) => index);
     setActiveIndex((index) =>
-      index === null ? null : (index - 1 + photos.length) % photos.length,
+      sequence[(sequence.indexOf(index ?? -1) - 1 + sequence.length) % sequence.length],
     );
   }
+
 
   // Show Next
   // Advances to the next photo in the lightbox, wrapping around to the first photo if at the end.
   function showNext() {
+    const sequence = slideshow?.sequence ?? photos.map((_, index) => index);
     setActiveIndex((index) =>
-      index === null ? null : (index + 1) % photos.length,
+      sequence[(sequence.indexOf(index ?? -1) + 1) % sequence.length],
     );
   }
 
@@ -82,11 +111,36 @@ export function PhotoLightboxProvider({
   // Opens the lightbox for a specific photo and stores the trigger button for focus return.
   function openPhoto(index: number, trigger: HTMLButtonElement) {
     returnFocusRef.current = trigger;
+    setSlideshow(null);
     setActiveIndex(index);
   }
 
+
+  // Start Slideshow
+  // Initializes a slideshow with the specified options and starts playing from the first photo in the sequence.
+  function startSlideshow(options: SlideshowOptions, trigger: HTMLButtonElement) {
+    const sequence = photos.map((_, index) => index);
+    if (options.order === "shuffled") {
+      for (let index = sequence.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [sequence[index], sequence[swapIndex]] = [sequence[swapIndex], sequence[index]];
+      }
+    }
+    returnFocusRef.current = trigger;
+    setSlideshow({ ...options, sequence, playing: true });
+    setActiveIndex(sequence[0] ?? null);
+  }
+
+
+  // Close Viewer
+  // Closes the lightbox and resets the active photo and slideshow state.
+  function closeViewer() {
+    setSlideshow(null);
+    setActiveIndex(null);
+  }
+
   return (
-    <PhotoLightboxContext.Provider value={openPhoto}>
+    <PhotoLightboxContext.Provider value={{ openPhoto, startSlideshow }}>
       {children}
       {activePhoto && activeIndex !== null ? (
         <div
@@ -96,7 +150,9 @@ export function PhotoLightboxProvider({
           aria-label="Photo viewer"
           tabIndex={-1}
           className="fixed inset-0 z-[100] flex flex-col bg-black/95 text-white"
-          onClick={() => setActiveIndex(null)}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) closeViewer();
+          }}
           onKeyDown={(event) => {
             if (event.key === "Escape") setActiveIndex(null);
             if (event.key === "ArrowLeft") showPrevious();
@@ -111,7 +167,7 @@ export function PhotoLightboxProvider({
               type="button"
               aria-label="Close photo viewer"
               title="Close"
-              onClick={() => setActiveIndex(null)}
+              onClick={closeViewer}
               className="flex size-10 items-center justify-center rounded-full bg-white/10 text-2xl transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             >
               <span aria-hidden="true">×</span>
@@ -122,27 +178,31 @@ export function PhotoLightboxProvider({
             className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-3 pt-16 sm:px-14"
             onClick={(event) => event.stopPropagation()}
           >
-            {activePhoto.type === "video" ? (
-              <video
-                key={activePhoto.src}
-                src={activePhoto.src}
-                poster={activePhoto.poster}
-                aria-label={activePhoto.alt}
-                controls
-                autoPlay
-                muted
-                playsInline
-                className="h-full w-full min-h-0 min-w-0 object-contain"
-              />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={activePhoto.src}
-                alt={activePhoto.alt}
-                className="max-h-full max-w-full select-none object-contain"
-                draggable={false}
-              />
-            )}
+            <div
+              key={activePhoto.src}
+              className={`flex h-full w-full min-h-0 min-w-0 items-center justify-center ${slideshow ? `slideshow-transition-${slideshow.transition}` : ""}`}
+            >
+              {activePhoto.type === "video" ? (
+                <video
+                  src={activePhoto.src}
+                  poster={activePhoto.poster}
+                  aria-label={activePhoto.alt}
+                  controls
+                  autoPlay
+                  muted
+                  playsInline
+                  className="h-full w-full min-h-0 min-w-0 object-contain"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={activePhoto.src}
+                  alt={activePhoto.alt}
+                  className="max-h-full max-w-full select-none object-contain"
+                  draggable={false}
+                />
+              )}
+            </div>
             {photos.length > 1 ? (
               <>
                 <button
@@ -167,13 +227,32 @@ export function PhotoLightboxProvider({
             ) : null}
           </div>
 
-          <div className="min-h-16 px-4 pb-5 text-center sm:px-8">
-            {activePhoto.caption ? (
-              <p className="font-medium">{activePhoto.caption}</p>
-            ) : null}
-            {activePhoto.detail ? (
-              <p className="mt-1 text-sm text-white/60">{activePhoto.detail}</p>
-            ) : null}
+          <div className="relative min-h-16 px-4 pb-5 text-center sm:px-8">
+            <div className="flex items-center justify-center gap-3 pb-2">
+              {slideshow ? (
+                <>
+                  <span className="text-xs text-white/60">
+                    {slideshow.playing ? "Slideshow" : "Paused"} · {slideshow.delaySeconds}s · {slideshow.order}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSlideshow((current) => current ? { ...current, playing: !current.playing } : null)}
+                    className="rounded border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+                  >
+                    {slideshow.playing ? "Pause" : "Resume"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSlideshow(null)}
+                    className="rounded border border-white/20 px-2 py-1 text-xs hover:bg-white/10"
+                  >
+                    End slideshow
+                  </button>
+                </>
+              ) : null}
+            </div>
+            {activePhoto.caption ? <p className="font-medium">{activePhoto.caption}</p> : null}
+            {activePhoto.detail ? <p className="mt-1 text-sm text-white/60">{activePhoto.detail}</p> : null}
           </div>
         </div>
       ) : null}
@@ -195,18 +274,79 @@ export function PhotoLightboxTrigger({
   children: ReactNode;
   className?: string;
 }) {
-  const openPhoto = useContext(PhotoLightboxContext);
-  if (!openPhoto) throw new Error("PhotoLightboxTrigger requires a PhotoLightboxProvider.");
+  const lightbox = useContext(PhotoLightboxContext);
+  if (!lightbox) throw new Error("PhotoLightboxTrigger requires a PhotoLightboxProvider.");
 
   return (
     <button
       type="button"
       aria-label={`Open ${type} ${index + 1} in fullscreen`}
-      onClick={(event) => openPhoto(index, event.currentTarget)}
+      onClick={(event) => lightbox.openPhoto(index, event.currentTarget)}
       className={`block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${className}`}
     >
       {children}
     </button>
+  );
+}
+
+
+// Photo Slideshow Controls
+// Configures and starts a slideshow from the provider's full media sequence.
+export function PhotoSlideshowControls() {
+  const lightbox = useContext(PhotoLightboxContext);
+  const [delaySeconds, setDelaySeconds] = useState(5);
+  const [order, setOrder] = useState<SlideshowOptions["order"]>("chronological");
+  const [transition, setTransition] = useState<SlideshowOptions["transition"]>("fade");
+  if (!lightbox) throw new Error("PhotoSlideshowControls requires a PhotoLightboxProvider.");
+
+  return (
+    <div className="flex flex-wrap items-end gap-3" aria-label="Slideshow settings">
+      <label className="grid gap-1 text-[11px] font-medium uppercase text-muted">
+        Delay
+        <select
+          value={delaySeconds}
+          onChange={(event) => setDelaySeconds(Number(event.target.value))}
+          className="rounded border border-border bg-surface px-2 py-1.5 text-sm normal-case text-foreground"
+        >
+          {[3, 5, 8, 10].map((seconds) => (
+            <option key={seconds} value={seconds}>{seconds} seconds</option>
+          ))}
+        </select>
+      </label>
+      <label className="grid gap-1 text-[11px] font-medium uppercase text-muted">
+        Order
+        <select
+          value={order}
+          onChange={(event) => setOrder(event.target.value as SlideshowOptions["order"])}
+          className="rounded border border-border bg-surface px-2 py-1.5 text-sm normal-case text-foreground"
+        >
+          <option value="chronological">Chronological</option>
+          <option value="shuffled">Shuffled</option>
+        </select>
+      </label>
+      <label className="grid gap-1 text-[11px] font-medium uppercase text-muted">
+        Transition
+        <select
+          value={transition}
+          onChange={(event) => setTransition(event.target.value as SlideshowOptions["transition"])}
+          className="rounded border border-border bg-surface px-2 py-1.5 text-sm normal-case text-foreground"
+        >
+          <option value="fade">Fade</option>
+          <option value="slide">Slide</option>
+          <option value="zoom">Zoom</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        onClick={(event) => lightbox.startSlideshow({ delaySeconds, order, transition }, event.currentTarget)}
+        className="inline-flex items-center gap-2 rounded-lg bg-accent px-3.5 py-2 text-sm font-medium text-background transition hover:bg-accent-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+          <path d="M8 5.5v13l10-6.5z" />
+        </svg>
+        Start slideshow
+      </button>
+    </div>
   );
 }
 
