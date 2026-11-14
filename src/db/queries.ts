@@ -16,6 +16,7 @@ import {
   type Project,
   type Task,
 } from "./schema";
+import { isVideoFilename } from "@/lib/media";
 
 
 // CARS
@@ -51,6 +52,26 @@ export async function listPhotos(carId: string): Promise<Photo[]> {
     .orderBy(asc(photos.sortOrder), desc(photos.createdAt));
 }
 
+// List All Photos - Fetches every photo with its car details in chronological order.
+export async function listAllPhotos() {
+  const db = getDb();
+  return db
+    .select({
+      id: photos.id,
+      carId: photos.carId,
+      filename: photos.filename,
+      caption: photos.caption,
+      createdAt: photos.createdAt,
+      carNickname: cars.nickname,
+      make: cars.make,
+      model: cars.model,
+      year: cars.year,
+    })
+    .from(photos)
+    .innerJoin(cars, eq(photos.carId, cars.id))
+    .orderBy(asc(photos.createdAt), asc(photos.id));
+}
+
 // Get Photo - Fetches a single photo by its ID from the database.
 export async function getPhoto(id: string): Promise<Photo | undefined> {
   const db = getDb();
@@ -65,9 +86,9 @@ export function photoUrl(carId: string, filename: string) {
 
 // Cover URL - Determines the cover photo URL for a car, using the cover photo ID if available, or the first photo in the list.
 export function coverUrl(car: Car, photosForCar: Photo[]) {
-  const cover =
-    (car.coverPhotoId && photosForCar.find((p) => p.id === car.coverPhotoId)) ||
-    photosForCar[0];
+  const cover = photosForCar.find(
+    (photo) => photo.id === car.coverPhotoId && !isVideoFilename(photo.filename),
+  ) || photosForCar.find((photo) => !isVideoFilename(photo.filename));
   return cover ? photoUrl(car.id, cover.filename) : null;
 }
 

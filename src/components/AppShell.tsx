@@ -47,6 +47,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             Fleet
           </NavLink>
+          <NavLink href="/gallery" active={pathname.startsWith("/gallery")}>
+            Gallery
+          </NavLink>
           <NavLink href="/jobs" active={pathname.startsWith("/jobs")}>
             Jobs
           </NavLink>
