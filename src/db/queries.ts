@@ -2,7 +2,7 @@
 // This file contains functions for querying the database using Drizzle ORM.
 
 // IMPORTS
-import { asc, desc, eq, isNull } from "drizzle-orm";
+import { asc, desc, eq, isNull, or } from "drizzle-orm";
 import { getDb } from "./index";
 import {
   cars,
@@ -15,6 +15,8 @@ import {
   type Photo,
   type Project,
   type Task,
+  type WarehouseItem,
+  warehouseItems,
 } from "./schema";
 import { isVideoFilename } from "@/lib/media";
 
@@ -152,5 +154,26 @@ export async function listDiagrams(carId: string): Promise<Diagram[]> {
 export async function getDiagram(id: string): Promise<Diagram | undefined> {
   const db = getDb();
   const rows = await db.select().from(diagrams).where(eq(diagrams.id, id)).limit(1);
+  return rows[0];
+}
+
+
+// WAREHOUSE
+// List Warehouse Items
+// Lists inventory items alphabetically for the warehouse table.
+export async function listWarehouseItems(): Promise<WarehouseItem[]> {
+  const db = getDb();
+  return db.select().from(warehouseItems).orderBy(asc(warehouseItems.name));
+}
+
+// Find Warehouse Item by Code
+// Finds an item by its internal ID, SKU, or scanned barcode/QR payload.
+export async function findWarehouseItemByCode(code: string): Promise<WarehouseItem | undefined> {
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(warehouseItems)
+    .where(or(eq(warehouseItems.id, code), eq(warehouseItems.sku, code), eq(warehouseItems.barcode, code)))
+    .limit(1);
   return rows[0];
 }
