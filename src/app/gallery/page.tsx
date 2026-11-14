@@ -6,8 +6,9 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import { PageHero } from "@/components/PageHero";
-import { PhotoLightboxProvider, PhotoLightboxTrigger } from "@/components/PhotoLightbox";
+import { PhotoLightboxProvider, PhotoLightboxTrigger, PhotoThumbnail } from "@/components/PhotoLightbox";
 import { listAllPhotos, photoUrl } from "@/db/queries";
+import { isVideoFilename, videoPosterUrl } from "@/lib/media";
 
 
 // DATE FORMATTER
@@ -42,7 +43,7 @@ async function GalleryContent() {
         kicker={
           <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-surface/80 px-4 py-1.5 backdrop-blur-md shadow-xl shadow-black/40">
             <span className="text-[11px] font-mono uppercase tracking-[0.22em] text-accent">
-              {photos.length} Photo{photos.length !== 1 ? "s" : ""} · Oldest First
+              {photos.length} Item{photos.length !== 1 ? "s" : ""} · Oldest First
             </span>
           </span>
         }
@@ -61,7 +62,9 @@ async function GalleryContent() {
             const vehicle = [photo.year, photo.make, photo.model].filter(Boolean).join(" ");
             return {
               src: photoUrl(photo.carId, photo.filename),
-              alt: photo.caption || `${photo.carNickname} photo`,
+              type: isVideoFilename(photo.filename) ? "video" : "image",
+              poster: isVideoFilename(photo.filename) ? videoPosterUrl(photo.carId, photo.filename) : undefined,
+              alt: photo.caption || `${photo.carNickname} ${isVideoFilename(photo.filename) ? "video" : "photo"}`,
               caption: photo.caption || vehicle || "Untitled photo",
               detail: `${photo.carNickname}${vehicle ? ` · ${vehicle}` : ""} · ${photoDateFormatter.format(photo.createdAt)}`,
             };
@@ -75,14 +78,23 @@ async function GalleryContent() {
 
               return (
                 <Card key={photo.id} className="overflow-hidden p-0">
-                  <PhotoLightboxTrigger index={index} className="group overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photoUrl(photo.carId, photo.filename)}
-                      alt={photo.caption || `${photo.carNickname} photo`}
-                      loading="lazy"
-                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                  <PhotoLightboxTrigger
+                    index={index}
+                    type={isVideoFilename(photo.filename) ? "video" : "image"}
+                    className="group relative overflow-hidden"
+                  >
+                    {isVideoFilename(photo.filename) ? (
+                      <PhotoThumbnail
+                        src={videoPosterUrl(photo.carId, photo.filename)}
+                        alt={photo.caption || `${photo.carNickname} video`}
+                        type="video"
+                      />
+                    ) : (
+                      <PhotoThumbnail
+                        src={photoUrl(photo.carId, photo.filename)}
+                        alt={photo.caption || `${photo.carNickname} photo`}
+                      />
+                    )}
                   </PhotoLightboxTrigger>
                   <Link href={`/cars/${photo.carId}/photos`} className="block space-y-1 p-3">
                     <time
