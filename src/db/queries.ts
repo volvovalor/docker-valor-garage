@@ -16,6 +16,7 @@ import {
   type Project,
   type Task,
 } from "./schema";
+import { isVideoFilename } from "@/lib/media";
 
 
 // CARS
@@ -85,9 +86,9 @@ export function photoUrl(carId: string, filename: string) {
 
 // Cover URL - Determines the cover photo URL for a car, using the cover photo ID if available, or the first photo in the list.
 export function coverUrl(car: Car, photosForCar: Photo[]) {
-  const cover =
-    (car.coverPhotoId && photosForCar.find((p) => p.id === car.coverPhotoId)) ||
-    photosForCar[0];
+  const cover = photosForCar.find(
+    (photo) => photo.id === car.coverPhotoId && !isVideoFilename(photo.filename),
+  ) || photosForCar.find((photo) => !isVideoFilename(photo.filename));
   return cover ? photoUrl(car.id, cover.filename) : null;
 }
 
