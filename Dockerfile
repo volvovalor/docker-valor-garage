@@ -14,6 +14,7 @@ ENV DATABASE_URL=file:/app/data/garage.db
 RUN mkdir -p /app/data/uploads && npm run build
 
 FROM node:22-bookworm-slim AS runner
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
