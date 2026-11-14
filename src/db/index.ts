@@ -18,6 +18,7 @@ import * as schema from "./schema";
 // - Tasks
 // - Diagrams
 // - Diagram Links
+// - Warehouse Items
 const CREATE_SQL = `
 CREATE TABLE IF NOT EXISTS cars (
   id TEXT PRIMARY KEY,
@@ -93,6 +94,27 @@ CREATE TABLE IF NOT EXISTS diagram_links (
   to_node_id TEXT,
   created_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS warehouse_items (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  description TEXT,
+  sku TEXT,
+  barcode TEXT,
+  location TEXT NOT NULL DEFAULT 'Unassigned',
+  quantity REAL NOT NULL DEFAULT 0,
+  unit TEXT NOT NULL DEFAULT 'pcs',
+  reorder_at REAL NOT NULL DEFAULT 0,
+  supplier TEXT,
+  unit_cost_cents INTEGER,
+  purchase_date TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS warehouse_items_barcode_idx ON warehouse_items(barcode);
+CREATE INDEX IF NOT EXISTS warehouse_items_sku_idx ON warehouse_items(sku);
 `;
 
 
