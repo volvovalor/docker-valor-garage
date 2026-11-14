@@ -3,9 +3,27 @@
 *Self-hosted hobby-fleet garage application with integrated tools like a task planner, wiring diagram design and more!*
 
 # What
+## Contents
+
+- **.vscode/**: VSCode workspace settings and launch configurations
+- **data/**: Persistent data storage for SQLite database and uploaded files
+- **public/**: Public assets and static files for the application
+- **src/**: Source code for the application, including components, actions, and database logic
+- **.dockerignore:** Files and directories to ignore when building the Docker image
+- **.env.example:** Example environment variables for configuration
+- **.gitignore:** Files and directories to ignore in Git version control
+- **AGENTS.md:** Notes on AI agents and their usage in the application
+- **DEV.md:** Development notes and instructions
+- **docker-compose.yml:** Docker Compose configuration for running the application and its dependencies
+- **Dockerfile:** Instructions for building the Docker image
+- **eslint.config.js:** ESLint configuration file
+- **next.config.ts:** Next.js configuration file
+- **package-lock.json:** Exact versions of dependencies
+- **package.json:** Project dependencies and scripts
+- **tsconfig.json:** TypeScript configuration file
+
 
 ## Features (W.I.P.)
-
 ### Fleet Bay (cars)
 Adding/removing cars you own or have let go. Describing simple details from make and model up to more detailed stats like cylinder volume and gear ratio's. All these details are eventually also useful in other features listed below.
 
@@ -23,18 +41,10 @@ A modification archive where you can list your mod parts and document your imple
 These mods can inherrently also be related to jobs from the job planner when you are getting ready to install them.
 
 ### The Warehouse (items)
-An inventory tool where you intake all purchased items you bring in. OEM parts, custom parts, consumables and raw materials being a few. Store them neatly wherever you like, a type of rack, bins you've labeled, ... Scan the barcode/qrcode on them for a quick and organized way of keeping track of your stuff. No more double ordering parts or oil filters while you already have some laying around. When consuming an item you'll be able to scan the barcode and simply say it's gone now and the item will be listed as "out-of-stock". Letting you know when you need to order more.
+An inventory for OEM parts, custom parts, consumables, tools, and raw materials. Record quantities, units, reorder points, suppliers, and storage locations such as racks and bins. Search by name, SKU, barcode, or QR code; use a camera or handheld scanner to find an item, then receive stock, consume a quantity, or mark it out of stock. Generate and print QR/Code128 labels for items that do not have a code.
 
 ### Showcase Gallery (photos)
 Owning a car you're proud of, you probably have an unhealthy amount of pictures too! Make or link albums here. You can also assign a picture to be the cover of your car's fleet profile.
-
-
-## Contents
-
-- **DEV.md:** Development notes and instructions
-- **package.json:** Project dependencies and scripts
-- **next.config.ts:** Next.js configuration file
-- **eslint.config.js:** ESLint configuration file
   
 
 # How
@@ -47,7 +57,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). SQLite and uploads live in `./data`.
-
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 

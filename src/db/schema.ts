@@ -2,7 +2,7 @@
 // This file defines the database schema using Drizzle ORM for a garage management application.
 
 // IMPORTS
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import type { CarSpecs, CustomPart, FlowDocument } from "@/lib/types";
 
 
@@ -111,6 +111,27 @@ export const diagramLinks = sqliteTable("diagram_links", {
 });
 
 
+// WAREHOUSE ITEMS
+// Tracks stock, identification, supplier, and storage location for inventory.
+export const warehouseItems = sqliteTable("warehouse_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  description: text("description"),
+  sku: text("sku"),
+  barcode: text("barcode"),
+  location: text("location").notNull().default("Unassigned"),
+  quantity: real("quantity").notNull().default(0),
+  unit: text("unit").notNull().default("pcs"),
+  reorderAt: real("reorder_at").notNull().default(0),
+  supplier: text("supplier"),
+  unitCostCents: integer("unit_cost_cents"),
+  purchaseDate: text("purchase_date"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+
 // SCHEMA EXPORTS
 export type Car = typeof cars.$inferSelect;
 export type Photo = typeof photos.$inferSelect;
@@ -118,3 +139,4 @@ export type Project = typeof projects.$inferSelect;
 export type Task = typeof tasks.$inferSelect;
 export type Diagram = typeof diagrams.$inferSelect;
 export type DiagramLink = typeof diagramLinks.$inferSelect;
+export type WarehouseItem = typeof warehouseItems.$inferSelect;
