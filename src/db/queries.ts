@@ -51,6 +51,26 @@ export async function listPhotos(carId: string): Promise<Photo[]> {
     .orderBy(asc(photos.sortOrder), desc(photos.createdAt));
 }
 
+// List All Photos - Fetches every photo with its car details in chronological order.
+export async function listAllPhotos() {
+  const db = getDb();
+  return db
+    .select({
+      id: photos.id,
+      carId: photos.carId,
+      filename: photos.filename,
+      caption: photos.caption,
+      createdAt: photos.createdAt,
+      carNickname: cars.nickname,
+      make: cars.make,
+      model: cars.model,
+      year: cars.year,
+    })
+    .from(photos)
+    .innerJoin(cars, eq(photos.carId, cars.id))
+    .orderBy(asc(photos.createdAt), asc(photos.id));
+}
+
 // Get Photo - Fetches a single photo by its ID from the database.
 export async function getPhoto(id: string): Promise<Photo | undefined> {
   const db = getDb();
