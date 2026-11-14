@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import { PageHero } from "@/components/PageHero";
+import { PhotoLightboxProvider, PhotoLightboxTrigger } from "@/components/PhotoLightbox";
 import { listAllPhotos, photoUrl } from "@/db/queries";
 
 
@@ -55,23 +56,35 @@ async function GalleryContent() {
           </p>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {photos.map((photo) => {
-            const vehicle = [photo.year, photo.make, photo.model]
-              .filter(Boolean)
-              .join(" ");
+        <PhotoLightboxProvider
+          photos={photos.map((photo) => {
+            const vehicle = [photo.year, photo.make, photo.model].filter(Boolean).join(" ");
+            return {
+              src: photoUrl(photo.carId, photo.filename),
+              alt: photo.caption || `${photo.carNickname} photo`,
+              caption: photo.caption || vehicle || "Untitled photo",
+              detail: `${photo.carNickname}${vehicle ? ` · ${vehicle}` : ""} · ${photoDateFormatter.format(photo.createdAt)}`,
+            };
+          })}
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.map((photo, index) => {
+              const vehicle = [photo.year, photo.make, photo.model]
+                .filter(Boolean)
+                .join(" ");
 
-            return (
-              <Card key={photo.id} className="overflow-hidden p-0">
-                <Link href={`/cars/${photo.carId}/photos`} className="group block">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photoUrl(photo.carId, photo.filename)}
-                    alt={photo.caption || `${photo.carNickname} photo`}
-                    loading="lazy"
-                    className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="space-y-1 p-3">
+              return (
+                <Card key={photo.id} className="overflow-hidden p-0">
+                  <PhotoLightboxTrigger index={index} className="group overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={photoUrl(photo.carId, photo.filename)}
+                      alt={photo.caption || `${photo.carNickname} photo`}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </PhotoLightboxTrigger>
+                  <Link href={`/cars/${photo.carId}/photos`} className="block space-y-1 p-3">
                     <time
                       dateTime={photo.createdAt.toISOString()}
                       className="block text-xs text-muted"
@@ -84,12 +97,12 @@ async function GalleryContent() {
                     <p className="text-sm text-muted">
                       {photo.carNickname}{vehicle ? ` · ${vehicle}` : ""}
                     </p>
-                  </div>
-                </Link>
-              </Card>
-            );
-          })}
-        </div>
+                  </Link>
+                </Card>
+              );
+            })}
+          </div>
+        </PhotoLightboxProvider>
       )}
     </div>
   );

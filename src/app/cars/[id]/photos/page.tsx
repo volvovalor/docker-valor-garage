@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { deletePhoto, setCoverPhoto, updatePhotoCaption, uploadPhotos } from "@/actions/photos";
 import { CarNav } from "@/components/CarNav";
 import { PageHero } from "@/components/PageHero";
+import { PhotoLightboxProvider, PhotoLightboxTrigger } from "@/components/PhotoLightbox";
 import { Button, Card, Input } from "@/components/ui";
 import { getCar, listPhotos, photoUrl } from "@/db/queries";
 
@@ -81,48 +82,67 @@ async function PhotosContent({ params }: { params: Promise<{ id: string }> }) {
           <p className="text-sm text-muted">No pictures yet. Drop in a bay shot or a glamour photo.</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {photos.map((photo, i) => (
-            <Card
-              key={photo.id}
-              className="overflow-hidden p-0 transition-all duration-300 hover:border-accent hover:shadow-lg hover:shadow-accent/5 hover-glow animate-slide-in-scale"
-              style={{ animationDelay: `${300 + i * 80}ms` }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photoUrl(car.id, photo.filename)}
-                alt={photo.caption ?? ""}
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-110"
-              />
-              <div className="space-y-2 p-3">
-                <form action={updatePhotoCaption} className="flex gap-2">
-                  <input type="hidden" name="id" value={photo.id} />
-                  <input type="hidden" name="carId" value={car.id} />
-                  <Input name="caption" defaultValue={photo.caption ?? ""} placeholder="Caption" />
-                  <Button type="submit" variant="outline">
-                    Save
-                  </Button>
-                </form>
-                <div className="flex gap-2">
-                  <form action={setCoverPhoto.bind(null, car.id, photo.id)} className="flex-1">
-                    <Button type="submit" variant="outline" className="w-full" disabled={car.coverPhotoId === photo.id}>
-                      {car.coverPhotoId === photo.id ? "✓ Cover" : "Set cover"}
+        <PhotoLightboxProvider
+          photos={photos.map((photo, index) => ({
+            src: photoUrl(car.id, photo.filename),
+            alt: photo.caption || `${car.nickname} photo ${index + 1}`,
+            caption: photo.caption || `${car.nickname} photo ${index + 1}`,
+            detail: `${car.nickname} · ${photoDateFormatter.format(photo.createdAt)}`,
+          }))}
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {photos.map((photo, i) => (
+              <Card
+                key={photo.id}
+                className="overflow-hidden p-0 transition-all duration-300 hover:border-accent hover:shadow-lg hover:shadow-accent/5 hover-glow animate-slide-in-scale"
+                style={{ animationDelay: `${300 + i * 80}ms` }}
+              >
+                <PhotoLightboxTrigger index={i} className="group overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photoUrl(car.id, photo.filename)}
+                    alt={photo.caption ?? ""}
+                    className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </PhotoLightboxTrigger>
+                <div className="space-y-2 p-3">
+                  <form action={updatePhotoCaption} className="flex gap-2">
+                    <input type="hidden" name="id" value={photo.id} />
+                    <input type="hidden" name="carId" value={car.id} />
+                    <Input name="caption" defaultValue={photo.caption ?? ""} placeholder="Caption" />
+                    <Button type="submit" variant="outline">
+                      Save
                     </Button>
                   </form>
-                  <form action={deletePhoto.bind(null, car.id, photo.id)}>
-                    <Button type="submit" variant="danger">
-                      Delete
-                    </Button>
-                  </form>
+                  <div className="flex gap-2">
+                    <form action={setCoverPhoto.bind(null, car.id, photo.id)} className="flex-1">
+                      <Button type="submit" variant="outline" className="w-full" disabled={car.coverPhotoId === photo.id}>
+                        {car.coverPhotoId === photo.id ? "✓ Cover" : "Set cover"}
+                      </Button>
+                    </form>
+                    <form action={deletePhoto.bind(null, car.id, photo.id)}>
+                      <Button type="submit" variant="danger">
+                        Delete
+                      </Button>
+                    </form>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        </PhotoLightboxProvider>
       )}
     </div>
   );
 }
+
+
+// Photo Date Formatter
+// Formats photo creation dates for display in the gallery and lightbox.
+const photoDateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 
 
 // PHOTOS FALLBACK
