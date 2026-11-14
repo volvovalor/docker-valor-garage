@@ -21,6 +21,8 @@ export interface PhotoLightboxItem {
   alt: string;
   caption?: string;
   detail?: string;
+  type?: "image" | "video";
+  poster?: string;
 }
 
 
@@ -119,13 +121,27 @@ export function PhotoLightboxProvider({
             className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-3 pt-16 sm:px-14"
             onClick={(event) => event.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={activePhoto.src}
-              alt={activePhoto.alt}
-              className="max-h-full max-w-full select-none object-contain"
-              draggable={false}
-            />
+            {activePhoto.type === "video" ? (
+              <video
+                key={activePhoto.src}
+                src={activePhoto.src}
+                poster={activePhoto.poster}
+                aria-label={activePhoto.alt}
+                controls
+                autoPlay
+                muted
+                playsInline
+                className="h-full w-full min-h-0 min-w-0 object-contain"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={activePhoto.src}
+                alt={activePhoto.alt}
+                className="max-h-full max-w-full select-none object-contain"
+                draggable={false}
+              />
+            )}
             {photos.length > 1 ? (
               <>
                 <button
@@ -169,10 +185,12 @@ export function PhotoLightboxProvider({
 // A button that opens the lightbox for a specific photo when clicked.
 export function PhotoLightboxTrigger({
   index,
+  type = "image",
   children,
   className = "",
 }: {
   index: number;
+  type?: "image" | "video";
   children: ReactNode;
   className?: string;
 }) {
@@ -182,12 +200,45 @@ export function PhotoLightboxTrigger({
   return (
     <button
       type="button"
-      aria-label={`Open photo ${index + 1} in fullscreen`}
+      aria-label={`Open ${type} ${index + 1} in fullscreen`}
       onClick={(event) => openPhoto(index, event.currentTarget)}
       className={`block w-full cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${className}`}
     >
       {children}
     </button>
+  );
+}
+
+
+// Photo Thumbnail
+// Displays a still image or video poster in the shared gallery grid.
+export function PhotoThumbnail({
+  src,
+  alt,
+  type = "image",
+}: {
+  src: string;
+  alt: string;
+  type?: "image" | "video";
+}) {
+  return (
+    <span className="relative block aspect-[4/3] overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      {type === "video" ? (
+        <span className="absolute inset-0 flex items-end justify-between bg-black/10 p-2 text-[10px] font-semibold uppercase text-white">
+          <span className="rounded bg-black/70 px-2 py-1">Video</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-9 drop-shadow">
+            <path d="M8 5.5v13l10-6.5z" />
+          </svg>
+        </span>
+      ) : null}
+    </span>
   );
 }
 
