@@ -9,6 +9,7 @@ import { Card } from "@/components/ui";
 import { PageHero } from "@/components/PageHero";
 import { listProjects } from "@/db/queries";
 import { JOB_STATUSES, PROJECT_CATEGORIES } from "@/lib/types";
+import { getPreferences } from "@/lib/browser-preferences";
 
 
 // MAIN FUNCTION
@@ -30,7 +31,7 @@ async function JobsContent({
 }: {
   searchParams: Promise<{ category?: string | string[]; status?: string | string[] }>;
 }) {
-  const sp = await searchParams;
+  const [sp, { jobsOrder }] = await Promise.all([searchParams, getPreferences()]);
   const category = Array.isArray(sp.category) ? sp.category[0] : sp.category;
   const status = Array.isArray(sp.status) ? sp.status[0] : sp.status;
   const projects = (await listProjects()).filter((p) => {
@@ -38,6 +39,11 @@ async function JobsContent({
     if (status && p.status !== status) return false;
     return true;
   });
+  if (jobsOrder === "oldest") {
+    projects.sort((first, second) => first.updatedAt.getTime() - second.updatedAt.getTime());
+  } else if (jobsOrder === "title") {
+    projects.sort((first, second) => first.title.localeCompare(second.title));
+  }
 
   const activeCount = projects.filter((p) => p.status === "in_progress").length;
 

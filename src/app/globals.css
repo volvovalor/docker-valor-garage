@@ -7,17 +7,25 @@
 
 /* COLOR PALETTE */
 :root {
-  --background: #0c0b0a;
-  --foreground: #f5f0e8;
-  --surface: #161412;
-  --surface-2: #1e1b18;
-  --border: #2e2924;
-  --muted: #a39b90;
-  --accent: #c4a574;
-  --accent-strong: #e0b56a;
-  --danger: #e07a5f;
+  color-scheme: dark;
+  --background: light-dark(#f5f6f3, #0c0b0a);
+  --foreground: light-dark(#1d2521, #f5f0e8);
+  --surface: light-dark(#ffffff, #161412);
+  --surface-2: light-dark(#e8ede8, #1e1b18);
+  --border: light-dark(#cbd4ce, #2e2924);
+  --muted: light-dark(#526058, #a39b90);
+  --accent: light-dark(#315c4d, #c4a574);
+  --accent-strong: light-dark(#234538, #e0b56a);
+  --danger: light-dark(#a43f30, #e07a5f);
 }
 
+:root:has([data-garage-theme="light"]) {
+  color-scheme: light;
+}
+
+:root:has([data-garage-theme="system"]) {
+  color-scheme: light dark;
+}
 
 /* THEME VARIABLES */
 @theme inline {
@@ -50,33 +58,26 @@ body {
 
 /* REACT FLOW STYLES */
 .react-flow {
-  --xy-background-color: #10100e;
-  --xy-node-background-color: #1c1916;
-  --xy-node-border: #3a342e;
-  --xy-edge-stroke: #c4a574;
-  background: #10100e;
+  --xy-background-color: var(--background);
+  --xy-node-background-color: var(--surface);
+  --xy-node-border: var(--border);
+  --xy-edge-stroke: var(--accent);
+  background: var(--background);
 }
 
 .react-flow__minimap {
-  background: #161412 !important;
+  background: var(--surface) !important;
 }
 
 .react-flow__controls button {
-  background: #1e1b18;
-  border-bottom: 1px solid #2e2924;
-  fill: #f5f0e8;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  fill: var(--foreground);
 }
 
 .react-flow__attribution {
   display: none;
 }
-
-
-/* DATE INPUT STYLES */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
-}
-
 
 
 /* -------------------------------------------------------------------------
@@ -249,10 +250,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   animation: slideshowZoom 650ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+:root:has([data-garage-motion="reduce"]) *,
+:root:has([data-garage-motion="reduce"]) *::before,
+:root:has([data-garage-motion="reduce"]) *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .slideshow-transition-fade,
-  .slideshow-transition-slide,
-  .slideshow-transition-zoom {
-    animation-duration: 1ms;
+  :root:has([data-garage-motion="system"]) *,
+  :root:has([data-garage-motion="system"]) *::before,
+  :root:has([data-garage-motion="system"]) *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
   }
 }

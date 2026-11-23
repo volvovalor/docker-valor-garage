@@ -43,7 +43,7 @@ export function PageHero({
         />
 
         {/* Cinematic overlays */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(12,11,10,0.1)_0%,rgba(12,11,10,0.8)_70%,#0c0b0a_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,transparent_0%,var(--background)_100%)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background" />
 
@@ -68,7 +68,7 @@ export function PageHero({
 
         {/* Animated title */}
         <h1 className="animate-fade-in-up delay-100 text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-tight">
-          <span className="bg-gradient-to-b from-white via-zinc-100 to-amber-100/90 bg-clip-text text-transparent drop-shadow-2xl">
+          <span className="bg-gradient-to-b from-foreground to-accent bg-clip-text text-transparent drop-shadow-2xl">
             {title}
           </span>
         </h1>

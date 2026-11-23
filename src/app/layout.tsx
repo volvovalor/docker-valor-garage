@@ -6,6 +6,7 @@ import { Suspense, type ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
+import { getPreferences } from "@/lib/browser-preferences";
 import "./globals.css";
 
 
@@ -33,13 +34,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full dark antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
-          <AppShell>{children}</AppShell>
+          <PreferredShell>{children}</PreferredShell>
         </Suspense>
       </body>
     </html>
   );
 }
+
+async function PreferredShell({ children }: { children: ReactNode }) {
+  const { theme, motion } = await getPreferences();
+  return <AppShell theme={theme} motion={motion}>{children}</AppShell>;
+}
+

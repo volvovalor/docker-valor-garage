@@ -3,11 +3,21 @@
 
 // IMPORTS
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { listCars, listProjects } from "@/db/queries";
+import { getPreferences } from "@/lib/browser-preferences";
 
 
 // MAIN FUNCTION
-export default async function FrontPage() {
+export default function FrontPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-background" />}><FrontPageContent /></Suspense>;
+}
+
+async function FrontPageContent() {
+  const { home } = await getPreferences();
+  if (home !== "/") redirect(home);
+
   // Query live garage stats from SQLite
   const cars = await listCars(true);
   const projects = await listProjects();
@@ -29,7 +39,7 @@ export default async function FrontPage() {
 
         {/* Multi-layered cinematic overlays */}
         {/* Radial vignette spotlighting the center */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(12,11,10,0.1)_0%,rgba(12,11,10,0.7)_65%,#0c0b0a_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,transparent_0%,var(--background)_100%)]" />
 
         {/* Vertical gradients top and bottom */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
@@ -101,6 +111,9 @@ export default async function FrontPage() {
 
           {/* Right status badge & quick entrance */}
           <div className="flex items-center gap-3">
+            <Link href="/settings" className="rounded-lg border border-border bg-surface/80 px-3 py-1.5 text-xs font-medium text-foreground hover:text-accent">
+              Settings
+            </Link>
             <div className="hidden sm:flex items-center gap-2 rounded-full border border-border/50 bg-surface/40 px-3 py-1 text-[11px] text-muted backdrop-blur-md font-mono">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -135,7 +148,7 @@ export default async function FrontPage() {
 
           {/* Big Bold Animated Project Title */}
           <h1 className="animate-fade-in-up delay-100 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.92]">
-            <span className="block bg-gradient-to-b from-white via-zinc-100 to-amber-100/90 bg-clip-text text-transparent drop-shadow-2xl">
+            <span className="block bg-gradient-to-b from-foreground to-accent bg-clip-text text-transparent drop-shadow-2xl">
               Valor
             </span>
             <span className="block bg-gradient-to-r from-accent via-accent-strong to-amber-200 bg-clip-text text-transparent drop-shadow-[0_4px_25px_rgba(196,165,116,0.3)]">
@@ -325,5 +338,4 @@ export default async function FrontPage() {
       </footer>
     </div>
   );
-  
 }
