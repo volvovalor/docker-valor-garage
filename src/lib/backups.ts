@@ -126,7 +126,12 @@ function schemaOf(sqlite: Database.Database) {
 function validateArchive(archive: Database.Database, live: Database.Database) {
   archive.pragma("trusted_schema = OFF");
   const schema = archive.prepare("SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = ?").pluck().get(filesTable);
-  if (schema !== filesSchema || JSON.stringify(schemaOf(archive)) !== JSON.stringify(schemaOf(live))
+  const archived = schemaOf(archive) as { tbl_name: string }[];
+  const current = schemaOf(live) as { tbl_name: string }[];
+  const optionalTables = new Set(["fuel_entries", "vehicle_expenses"]);
+  const expected = current.filter((entry) => !optionalTables.has(entry.tbl_name)
+    || archived.some((old) => old.tbl_name === entry.tbl_name));
+  if (schema !== filesSchema || JSON.stringify(archived) !== JSON.stringify(expected)
     || archive.pragma("quick_check", { simple: true }) !== "ok") throw new Error("Invalid or incompatible garage backup.");
 }
 
@@ -226,3 +231,4 @@ export function applyQueuedRestore() {
     }
   }
 }
+

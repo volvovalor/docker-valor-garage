@@ -10,6 +10,7 @@ services:
 
     environment:
       DATABASE_URL: file:/app/data/garage.db
+      FUEL_CURRENCY: ${FUEL_CURRENCY:-EUR}
       BACKUP_DIR: /app/backups
       BACKUP_ADMIN_TOKEN: ${BACKUP_ADMIN_TOKEN:-}
       BACKGROUND_DIR: /app/backgrounds
@@ -18,5 +19,5 @@ services:
       - ./data:/app/data
       - ${BACKUP_HOST_DIR:-./backups}:/app/backups
       - ${BACKGROUND_HOST_DIR:-./backgrounds}:/app/backgrounds:ro
-      
+
     restart: unless-stopped

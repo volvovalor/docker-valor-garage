@@ -9,12 +9,13 @@ import { garageSettings } from "@/lib/garage-settings";
 
 
 // MAIN FUNCTION
-export async function CarNav({ car, segment }: { car: Car; segment: "overview" | "photos" | "jobs" | "wiring" }) {
+export async function CarNav({ car, segment }: { car: Car; segment: "overview" | "photos" | "jobs" | "wiring" | "costs" }) {
   const { jobs, wiring } = await garageSettings();
   const base = `/cars/${car.id}`;
   const tabs = [
     { id: "overview" as const, href: base, label: "Overview" },
     { id: "photos" as const, href: `${base}/photos`, label: "Photos" },
+    { id: "costs", href: `${base}/costs`, label: "Costs" },
     ...(jobs ? [{ id: "jobs", href: `${base}/jobs`, label: "Jobs" }] : []),
     ...(wiring ? [{ id: "wiring", href: `${base}/wiring`, label: "Wiring" }] : []),
   ];
@@ -30,11 +31,12 @@ export async function CarNav({ car, segment }: { car: Car; segment: "overview" |
           {car.archivedAt ? " · archived" : ""}
         </p>
       </div>
-      <div className="flex gap-1 border-b border-border">
+      <div className="flex flex-wrap gap-1 border-b border-border">
         {tabs.map((tab) => (
           <Link
             key={tab.id}
             href={tab.href}
+            aria-current={segment === tab.id ? "page" : undefined}
             className={cn(
               "-mb-px border-b-2 px-3 py-2 text-sm transition",
               segment === tab.id

@@ -53,6 +53,36 @@ CREATE TABLE IF NOT EXISTS photos (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS fuel_entries (
+  id TEXT PRIMARY KEY,
+  car_id TEXT NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+  logged_at INTEGER NOT NULL,
+  odometer_km REAL NOT NULL CHECK (odometer_km >= 0),
+  liters REAL NOT NULL CHECK (liters > 0),
+  fuel_type TEXT NOT NULL,
+  price_per_liter REAL NOT NULL CHECK (price_per_liter >= 0),
+  discount REAL NOT NULL CHECK (discount BETWEEN 0 AND 100),
+  full_tank INTEGER NOT NULL CHECK (full_tank IN (0, 1)),
+  missed_previous INTEGER NOT NULL CHECK (missed_previous IN (0, 1)),
+  station TEXT NOT NULL,
+  notes TEXT NOT NULL,
+  receipt_mime TEXT,
+  receipt BLOB
+);
+
+CREATE INDEX IF NOT EXISTS fuel_entries_car_time_idx ON fuel_entries(car_id, logged_at);
+
+CREATE TABLE IF NOT EXISTS vehicle_expenses (
+  id TEXT PRIMARY KEY,
+  car_id TEXT NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
+  logged_at INTEGER NOT NULL,
+  category TEXT NOT NULL,
+  title TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL CHECK (amount_cents > 0)
+);
+
+CREATE INDEX IF NOT EXISTS vehicle_expenses_car_time_idx ON vehicle_expenses(car_id, logged_at);
+
 
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
