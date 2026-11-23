@@ -10,10 +10,12 @@ import type { Preferences } from "@/lib/preferences";
 
 
 // MAIN FUNCTION
-export function AppShell({ children, theme, motion }: {
+export function AppShell({ children, theme, motion, gallery, jobs }: {
   children: React.ReactNode;
   theme: Preferences["theme"];
   motion: Preferences["motion"];
+  gallery: boolean;
+  jobs: boolean;
 }) {
   const pathname = usePathname();
   const isLanding = pathname === "/";
@@ -55,15 +57,12 @@ export function AppShell({ children, theme, motion }: {
           <NavLink href="/warehouse" active={pathname.startsWith("/warehouse")}>
             Warehouse
           </NavLink>
-          <NavLink href="/gallery" active={pathname.startsWith("/gallery")}>
+          {gallery && <NavLink href="/gallery" active={pathname.startsWith("/gallery")}>
             Gallery
-          </NavLink>
-          <NavLink href="/jobs" active={pathname.startsWith("/jobs")}>
+          </NavLink>}
+          {jobs && <NavLink href="/jobs" active={pathname.startsWith("/jobs")}>
             Jobs
-          </NavLink>
-          <NavLink href="/cars/new" active={pathname === "/cars/new"}>
-            Add car
-          </NavLink>
+          </NavLink>}
           <NavLink href="/settings" active={pathname === "/settings"}>
             Settings
           </NavLink>

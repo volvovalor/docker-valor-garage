@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { listCars, listProjects } from "@/db/queries";
 import { getPreferences } from "@/lib/browser-preferences";
+import { garageSettings } from "@/lib/garage-settings";
+import { homepageBackground } from "@/lib/home-background";
 
 
 // MAIN FUNCTION
@@ -15,12 +17,15 @@ export default function FrontPage() {
 }
 
 async function FrontPageContent() {
-  const { home } = await getPreferences();
-  if (home !== "/") redirect(home);
+  const [{ home }, settings] = await Promise.all([getPreferences(), garageSettings()]);
+  if (home !== "/" && (home !== "/jobs" || settings.jobs) && (home !== "/gallery" || settings.gallery)) redirect(home);
 
   // Query live garage stats from SQLite
-  const cars = await listCars(true);
-  const projects = await listProjects();
+  const [cars, projects, background] = await Promise.all([
+    settings.homeStats ? listCars(true) : [],
+    settings.homeStats && settings.jobs ? listProjects() : [],
+    homepageBackground(settings),
+  ]);
   const activeProjects = projects.filter((p) => p.status === "in_progress");
 
   return (
@@ -32,8 +37,8 @@ async function FrontPageContent() {
         {/* The classic Volvo hero photograph */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/images/hero-garage.jpg"
-          alt="Valor Garage Classic Volvo"
+          src={background}
+          alt=""
           className="h-full w-full object-cover object-center animate-slow-zoom opacity-45 sm:opacity-50 scale-105"
         />
 
@@ -95,18 +100,12 @@ async function FrontPageContent() {
             >
               Fleet Bay
             </Link>
-            <Link
+            {settings.jobs && <Link
               href="/jobs"
               className="rounded-full px-3.5 py-1 text-xs font-medium text-muted transition hover:text-accent hover:bg-surface-2/60"
             >
               Jobs & Projects
-            </Link>
-            <Link
-              href="/cars/new"
-              className="rounded-full px-3.5 py-1 text-xs font-medium text-muted transition hover:text-accent hover:bg-surface-2/60"
-            >
-              + Add Vehicle
-            </Link>
+            </Link>}
           </nav>
 
           {/* Right status badge & quick entrance */}
@@ -189,7 +188,7 @@ async function FrontPageContent() {
             </Link>
 
             {/* Secondary Action Button */}
-            <Link
+              {settings.jobs && <Link
               href="/jobs"
               className="group inline-flex items-center gap-2.5 rounded-xl border border-border bg-surface/70 px-6 py-3.5 text-sm font-medium text-foreground backdrop-blur-md transition-all duration-200 hover:border-accent hover:bg-surface-2 hover:scale-[1.02] active:scale-[0.98]"
             >
@@ -207,7 +206,7 @@ async function FrontPageContent() {
                 />
               </svg>
               <span>Manage Jobs</span>
-            </Link>
+            </Link>}
 
             {/* Tertiary Action Button */}
             <Link
@@ -232,13 +231,14 @@ async function FrontPageContent() {
           </div>
 
           {/* Quick Real-Time Metrics Strip */}
-          <div className="animate-fade-in-up delay-400 mt-10 flex flex-wrap items-center justify-center gap-8 border-t border-border/40 pt-6 text-xs text-muted font-mono">
+          {settings.homeStats && <div className="animate-fade-in-up delay-400 mt-10 flex flex-wrap items-center justify-center gap-8 border-t border-border/40 pt-6 text-xs text-muted font-mono">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground text-sm">
                 {cars.length}
               </span>
               <span>{cars.length === 1 ? "Vehicle" : "Vehicles"} Docked</span>
             </div>
+            {settings.jobs && <>
             <div className="h-3 w-px bg-border/60" />
             <div className="flex items-center gap-2">
               <span className="font-semibold text-accent text-sm">
@@ -253,7 +253,8 @@ async function FrontPageContent() {
               </span>
               <span>Total Projects</span>
             </div>
-          </div>
+            </>}
+          </div>}
         </div>
       </main>
 
@@ -284,7 +285,7 @@ async function FrontPageContent() {
             </Link>
 
             {/* Feature 2: Nested Jobs */}
-            <Link
+            {settings.jobs && <Link
               href="/jobs"
               className="group rounded-xl border border-border/60 bg-surface/50 p-4 backdrop-blur-md transition-all duration-200 hover:border-accent/60 hover:bg-surface/80 hover:shadow-lg hover:shadow-black/40"
             >
@@ -301,10 +302,10 @@ async function FrontPageContent() {
                 Break major restorations down into sub-tasks with live status,
                 parts tracking, and milestones.
               </p>
-            </Link>
+            </Link>}
 
             {/* Feature 3: Interactive Wiring */}
-            <Link
+            {settings.wiring && <Link
               href="/cars"
               className="group rounded-xl border border-border/60 bg-surface/50 p-4 backdrop-blur-md transition-all duration-200 hover:border-accent/60 hover:bg-surface/80 hover:shadow-lg hover:shadow-black/40"
             >
@@ -321,7 +322,7 @@ async function FrontPageContent() {
                 Node-based harness visualizer with custom pinouts, color coding,
                 and live connection tracing.
               </p>
-            </Link>
+            </Link>}
           </div>
 
           <div className="mt-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-muted/70 gap-2 border-t border-border/30 pt-3">

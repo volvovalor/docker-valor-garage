@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createDiagram } from "@/actions/diagrams";
 import { CarNav } from "@/components/CarNav";
+import { requireFeature } from "@/lib/garage-settings";
 import { PageHero } from "@/components/PageHero";
 import { Button, Card, Field, Input, Textarea } from "@/components/ui";
 import { getCar, listDiagrams } from "@/db/queries";
@@ -26,6 +27,7 @@ export default function WiringIndexPage({ params }: { params: Promise<{ id: stri
 // Loads and renders a vehicle's diagrams after route params resolve.
 async function WiringContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  await requireFeature("wiring");
   const car = await getCar(id);
   if (!car) notFound();
   const diagrams = await listDiagrams(id);

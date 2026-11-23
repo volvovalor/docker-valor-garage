@@ -7,6 +7,7 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { databaseFile, uploadsDir } from "@/lib/paths";
+import { applyQueuedRestore } from "@/lib/backups";
 import * as schema from "./schema";
 
 
@@ -20,6 +21,11 @@ import * as schema from "./schema";
 // - Diagram Links
 // - Warehouse Items
 const CREATE_SQL = `
+CREATE TABLE IF NOT EXISTS garage_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  value TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS cars (
   id TEXT PRIMARY KEY,
   nickname TEXT NOT NULL,
@@ -119,7 +125,7 @@ CREATE INDEX IF NOT EXISTS warehouse_items_sku_idx ON warehouse_items(sku);
 
 
 // Database connection variable
-type Db = ReturnType<typeof drizzle<typeof schema>>;
+type Db = ReturnType<typeof open>;
 declare global {
   var __valorGarageDb: Db | undefined;
 }
@@ -128,6 +134,7 @@ declare global {
 // Open
 // Open a connection to the database
 function open() {
+  applyQueuedRestore();
   const file = databaseFile();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.mkdirSync(uploadsDir(), { recursive: true });

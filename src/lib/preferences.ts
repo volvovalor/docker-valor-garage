@@ -1,3 +1,7 @@
+// PREFERENCES
+// Defines available preference options, default preferences, and utility functions to normalize and parse preferences.
+
+// CONSTANTS
 export const preferenceOptions = {
   theme: [
     { value: "dark", label: "Dark" },
@@ -31,12 +35,18 @@ export const preferenceOptions = {
   ],
 } as const;
 
+
+// TYPES
 type Choice = keyof typeof preferenceOptions;
 
+
+// PREFERENCE CHOICES
 export type Preferences = {
   [Name in Choice]: (typeof preferenceOptions)[Name][number]["value"];
 } & { showArchived: boolean };
 
+
+// DEFAULT PREFERENCES
 export const defaultPreferences: Preferences = {
   theme: "dark",
   motion: "system",
@@ -47,6 +57,9 @@ export const defaultPreferences: Preferences = {
   showArchived: false,
 };
 
+
+// Read Choice
+// Utility function to read a preference choice from the available options, falling back to a default if the input is invalid.
 function readChoice<Value extends string>(
   options: readonly { value: Value }[],
   input: unknown,
@@ -55,6 +68,9 @@ function readChoice<Value extends string>(
   return options.find((option) => option.value === input)?.value ?? fallback;
 }
 
+
+// Normalize Preferences
+// Converts an arbitrary input into a valid Preferences object, using defaults for missing or invalid values.
 export function normalizePreferences(input: unknown): Preferences {
   const values = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
   return {
@@ -68,6 +84,9 @@ export function normalizePreferences(input: unknown): Preferences {
   };
 }
 
+
+// Parse Preferences
+// Parses a JSON string into a Preferences object, falling back to defaults on error.
 export function parsePreferences(value: string | undefined): Preferences {
   try {
     return normalizePreferences(value ? JSON.parse(value) : null);
@@ -75,4 +94,3 @@ export function parsePreferences(value: string | undefined): Preferences {
     return defaultPreferences;
   }
 }
-

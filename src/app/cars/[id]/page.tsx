@@ -1,4 +1,5 @@
 // CAR DETAIL PAGE
+// Displays the details of a specific vehicle, including its cover photo and specifications.
 
 // IMPORTS
 import { Suspense } from "react";
@@ -9,6 +10,8 @@ import { CarNav } from "@/components/CarNav";
 import { PageHero } from "@/components/PageHero";
 import { Badge, Button, Card } from "@/components/ui";
 import { getCar, listPhotos, coverUrl } from "@/db/queries";
+import { displayDisplacement } from "@/lib/garage-options";
+import { garageSettings } from "@/lib/garage-settings";
 
 
 // MAIN FUNCTION
@@ -30,6 +33,7 @@ async function CarOverviewContent({ params }: { params: Promise<{ id: string }> 
   const photos = await listPhotos(id);
   const cover = coverUrl(car, photos);
   const specs = car.specs ?? {};
+  const { units } = await garageSettings();
 
   return (
     <div>
@@ -80,7 +84,7 @@ async function CarOverviewContent({ params }: { params: Promise<{ id: string }> 
             </h2>
             <dl className="grid gap-3 sm:grid-cols-2 text-sm">
               <Spec label="Engine" value={specs.engine} />
-              <Spec label="Displacement" value={specs.displacement} />
+              <Spec label="Displacement" value={displayDisplacement(specs.displacement, units)} />
               <Spec label="Transmission" value={specs.transmission} />
               <Spec label="Drivetrain" value={specs.drivetrain} />
               <Spec label="Fuel" value={specs.fuel} />

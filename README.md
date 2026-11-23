@@ -1,3 +1,5 @@
+<!-- TODO: Manually review the settings changes on the dev machine. -->
+
 # Docker: Valor Garage
 
 *Self-hosted hobby-fleet garage application with integrated tools like a task planner, wiring diagram design and more!*
@@ -73,6 +75,5 @@ The database and photos persist in `./data`.
 
 - [ ] Favicon more in theme of application
 - [ ] globals.css: seperate global styling and styling for elements, pages
-- [ ] Homepage: hero image is a default one up until there is at least one photo available inside any gallery, make the hero image random too each time loading the front page
 - [ ] actions/cars: Has a "parts" function but this could eventually be another type of object
 - [ ] Convert into docker image

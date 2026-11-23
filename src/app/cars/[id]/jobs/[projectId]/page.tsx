@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteProject, updateProject } from "@/actions/projects";
 import { CarNav } from "@/components/CarNav";
+import { requireFeature } from "@/lib/garage-settings";
 import { PageHero } from "@/components/PageHero";
 import { TaskTree } from "@/components/TaskTree";
 import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
@@ -36,6 +37,7 @@ async function ProjectContent({
   params: Promise<{ id: string; projectId: string }>;
 }) {
   const { id, projectId } = await params;
+  await requireFeature("jobs");
   const car = await getCar(id);
   const project = await getProject(projectId);
   if (!car || !project || project.carId !== id) notFound();

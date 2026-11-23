@@ -10,6 +10,7 @@ import { PhotoLightboxProvider, PhotoLightboxTrigger, PhotoSlideshowControls, Ph
 import { listAllPhotos, photoUrl } from "@/db/queries";
 import { isVideoFilename, videoPosterUrl } from "@/lib/media";
 import { getPreferences } from "@/lib/browser-preferences";
+import { requireFeature } from "@/lib/garage-settings";
 
 
 // DATE FORMATTER
@@ -32,6 +33,7 @@ export default function GalleryPage() {
 // GALLERY CONTENT
 // Fetches all photos and renders the gallery.
 async function GalleryContent() {
+  await requireFeature("gallery");
   const { galleryOrder } = await getPreferences();
   const photos = await listAllPhotos();
   if (galleryOrder === "newest") photos.reverse();

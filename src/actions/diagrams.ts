@@ -19,6 +19,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { diagramLinks, diagrams } from "@/db/schema";
 import { newId } from "@/lib/ids";
+import { requireFeature } from "@/lib/garage-settings";
 import { carUploadDir } from "@/lib/paths";
 import { EMPTY_FLOW, type FlowDocument } from "@/lib/types";
 
@@ -35,6 +36,7 @@ function str(form: FormData, key: string) {
 // Validates required fields, generates new ID, inserts the diagram data into the database.
 // Revalidates the relevant paths and redirects to the newly created diagram's page.
 export async function createDiagram(form: FormData) {
+  await requireFeature("wiring");
   const carId = str(form, "carId");
   const title = str(form, "title");
   if (!carId || !title) throw new Error("Title is required.");
@@ -60,6 +62,7 @@ export async function createDiagram(form: FormData) {
 // Updates the metadata of an existing diagram entry in the database.
 // Validates required fields and revalidates the relevant paths.
 export async function updateDiagramMeta(form: FormData) {
+  await requireFeature("wiring");
   const id = str(form, "id");
   const carId = str(form, "carId");
   const title = str(form, "title");
@@ -83,6 +86,7 @@ export async function updateDiagramMeta(form: FormData) {
 // Updates the flow JSON and manages the links between diagrams based on the nodes in the flow.
 // Revalidates the relevant paths.
 export async function saveDiagramFlow(diagramId: string, carId: string, flow: FlowDocument) {
+  await requireFeature("wiring");
   const db = getDb();
   await db
     .update(diagrams)
@@ -113,6 +117,7 @@ export async function saveDiagramFlow(diagramId: string, carId: string, flow: Fl
 // Validates file, saves to the appropriate directory, updates diagram entry in the database with the filename.
 // Revalidates the relevant paths.
 export async function uploadDiagramBackground(form: FormData) {
+  await requireFeature("wiring");
   const diagramId = str(form, "diagramId");
   const carId = str(form, "carId");
   const file = form.get("file");
@@ -134,6 +139,7 @@ export async function uploadDiagramBackground(form: FormData) {
 // Clears background image of diagram by setting the background filename to null in the database.
 // Revalidates the relevant paths to reflect the change.
 export async function clearDiagramBackground(diagramId: string, carId: string) {
+  await requireFeature("wiring");
   const db = getDb();
   await db
     .update(diagrams)
@@ -148,6 +154,7 @@ export async function clearDiagramBackground(diagramId: string, carId: string) {
 // Removes the diagram and its associated links. 
 // Revalidates the relevant paths, and redirects to the wiring page of the car.
 export async function deleteDiagram(carId: string, diagramId: string) {
+  await requireFeature("wiring");
   const db = getDb();
   await db.delete(diagrams).where(eq(diagrams.id, diagramId));
   revalidatePath(`/cars/${carId}/wiring`);

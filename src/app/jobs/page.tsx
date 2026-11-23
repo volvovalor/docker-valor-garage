@@ -10,6 +10,7 @@ import { PageHero } from "@/components/PageHero";
 import { listProjects } from "@/db/queries";
 import { JOB_STATUSES, PROJECT_CATEGORIES } from "@/lib/types";
 import { getPreferences } from "@/lib/browser-preferences";
+import { requireFeature } from "@/lib/garage-settings";
 
 
 // MAIN FUNCTION
@@ -32,6 +33,7 @@ async function JobsContent({
   searchParams: Promise<{ category?: string | string[]; status?: string | string[] }>;
 }) {
   const [sp, { jobsOrder }] = await Promise.all([searchParams, getPreferences()]);
+  await requireFeature("jobs");
   const category = Array.isArray(sp.category) ? sp.category[0] : sp.category;
   const status = Array.isArray(sp.status) ? sp.status[0] : sp.status;
   const projects = (await listProjects()).filter((p) => {

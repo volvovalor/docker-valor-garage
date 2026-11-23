@@ -5,16 +5,18 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import type { Car } from "@/db/schema";
+import { garageSettings } from "@/lib/garage-settings";
 
 
 // MAIN FUNCTION
-export function CarNav({ car, segment }: { car: Car; segment: "overview" | "photos" | "jobs" | "wiring" }) {
+export async function CarNav({ car, segment }: { car: Car; segment: "overview" | "photos" | "jobs" | "wiring" }) {
+  const { jobs, wiring } = await garageSettings();
   const base = `/cars/${car.id}`;
   const tabs = [
     { id: "overview" as const, href: base, label: "Overview" },
     { id: "photos" as const, href: `${base}/photos`, label: "Photos" },
-    { id: "jobs" as const, href: `${base}/jobs`, label: "Jobs" },
-    { id: "wiring" as const, href: `${base}/wiring`, label: "Wiring" },
+    ...(jobs ? [{ id: "jobs", href: `${base}/jobs`, label: "Jobs" }] : []),
+    ...(wiring ? [{ id: "wiring", href: `${base}/wiring`, label: "Wiring" }] : []),
   ];
   return (
     <div className="mb-8">

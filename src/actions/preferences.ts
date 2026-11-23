@@ -1,10 +1,16 @@
+// Preferences Action
+// Handles the saving and resetting of user preferences based on the submitted form data.
 "use server";
 
+// IMPORTS
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { preferencesCookie } from "@/lib/browser-preferences";
 import { normalizePreferences } from "@/lib/preferences";
 
+
+// Save Preferences
+// Processes the form data, normalizes the preferences, sets the cookie, and redirects to the settings page.
 export async function savePreferences(formData: FormData) {
   const store = await cookies();
   if (formData.get("intent") === "reset") {
@@ -24,4 +30,3 @@ export async function savePreferences(formData: FormData) {
   });
   redirect("/settings?updated=saved");
 }
-

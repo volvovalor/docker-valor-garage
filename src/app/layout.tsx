@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { getPreferences } from "@/lib/browser-preferences";
+import { garageSettings } from "@/lib/garage-settings";
 import "./globals.css";
 
 
@@ -46,7 +47,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 
 async function PreferredShell({ children }: { children: ReactNode }) {
-  const { theme, motion } = await getPreferences();
-  return <AppShell theme={theme} motion={motion}>{children}</AppShell>;
+  const [{ theme, motion }, { gallery, jobs }] = await Promise.all([getPreferences(), garageSettings()]);
+  return <AppShell theme={theme} motion={motion} gallery={gallery} jobs={jobs}>{children}</AppShell>;
 }
-

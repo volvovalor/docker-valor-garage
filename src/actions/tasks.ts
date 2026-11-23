@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/db";
 import { tasks } from "@/db/schema";
 import { newId } from "@/lib/ids";
+import { requireFeature } from "@/lib/garage-settings";
 
 
 // Add Task
@@ -18,6 +19,7 @@ import { newId } from "@/lib/ids";
 // Validates required fields, generates a new ID, and inserts the task data into the database. 
 // After insertion, it revalidates the relevant paths.
 export async function addTask(form: FormData) {
+  await requireFeature("jobs");
   const projectId = String(form.get("projectId") ?? "");
   const carId = String(form.get("carId") ?? "");
   const title = String(form.get("title") ?? "").trim();
@@ -46,6 +48,7 @@ export async function addTask(form: FormData) {
 // Retrieves task ID, car ID, and project ID from the form data, updates the task's status in the database.
 // Revalidates the relevant paths to reflect the change in the UI.
 export async function toggleTask(form: FormData) {
+  await requireFeature("jobs");
   const id = String(form.get("id") ?? "");
   const carId = String(form.get("carId") ?? "");
   const projectId = String(form.get("projectId") ?? "");
@@ -61,6 +64,7 @@ export async function toggleTask(form: FormData) {
 // Retrieves task ID, car ID, project ID, and new title from the form data. updates the task's title in the database. 
 // Revalidates the relevant paths to reflect the change in the UI.
 export async function updateTaskTitle(form: FormData) {
+  await requireFeature("jobs");
   const id = String(form.get("id") ?? "");
   const carId = String(form.get("carId") ?? "");
   const projectId = String(form.get("projectId") ?? "");
@@ -77,6 +81,7 @@ export async function updateTaskTitle(form: FormData) {
 // Retrieves the task ID, car ID, and project ID from the form data, removes the task from the database. 
 // Revalidates the relevant paths to update the UI.
 export async function deleteTask(form: FormData) {
+  await requireFeature("jobs");
   const id = String(form.get("id") ?? "");
   const carId = String(form.get("carId") ?? "");
   const projectId = String(form.get("projectId") ?? "");

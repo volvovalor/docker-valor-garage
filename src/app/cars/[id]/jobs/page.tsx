@@ -1,5 +1,5 @@
 // JOBS PAGE
-// Lists all jobs in the system, with links to their details.
+// Lists all jobs for a specific vehicle, with links to their details.
 
 // IMPORTS
 import type { ReactNode } from "react";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createProject } from "@/actions/projects";
 import { CarNav } from "@/components/CarNav";
+import { requireFeature } from "@/lib/garage-settings";
 import { PageHero } from "@/components/PageHero";
 import { CategoryBadge, StatusBadge } from "@/components/StatusBadge";
 import { Button, Card, Field, Input, Select, Textarea } from "@/components/ui";
@@ -31,7 +32,7 @@ export default function JobsPage({
 }
 
 
-// JOBS CONTENT
+// Jobs Content
 // Loads the selected vehicle and filtered projects after URL params resolve.
 async function JobsContent({
   params,
@@ -41,6 +42,7 @@ async function JobsContent({
   searchParams: Promise<{ category?: string | string[]; status?: string | string[] }>;
 }) {
   const { id } = await params;
+  await requireFeature("jobs");
   const sp = await searchParams;
   const car = await getCar(id);
   if (!car) notFound();
@@ -182,7 +184,7 @@ async function JobsContent({
 }
 
 
-// JOBS FALLBACK
+// Jobs Fallback
 // Displays a loading state while the vehicle's jobs are being fetched.
 function JobsFallback() {
   return (
@@ -200,10 +202,16 @@ function JobsFallback() {
   );
 }
 
+
+// First
+// Returns the first element of an array or the value itself if it's not an array.
 function first(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v;
 }
 
+
+// Filter Link
+// Renders a link styled as a filter button, indicating its active state.
 function FilterLink({
   href,
   active,

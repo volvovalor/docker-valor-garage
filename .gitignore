@@ -1,7 +1,10 @@
+# Git ignore file for the Valor Garage project
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # data
 /data
+/backups
+/backgrounds
 
 # dependencies
 /node_modules
