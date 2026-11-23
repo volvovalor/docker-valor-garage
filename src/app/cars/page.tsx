@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { listCars, listPhotos, coverUrl } from "@/db/queries";
 import { Badge, Button, Card } from "@/components/ui";
 import { PageHero } from "@/components/PageHero";
+import { getPreferences } from "@/lib/browser-preferences";
 
 
 // MAIN FUNCTION
@@ -28,10 +29,18 @@ async function FleetContent({
 }: {
   searchParams: Promise<{ archived?: string | string[] }>;
 }) {
-  const sp = await searchParams;
+  const [sp, preferences] = await Promise.all([searchParams, getPreferences()]);
   const archived = Array.isArray(sp.archived) ? sp.archived[0] : sp.archived;
-  const showArchived = archived === "1";
+  const showArchived = archived === "1" || (archived !== "0" && preferences.showArchived);
   const cars = await listCars(showArchived);
+  if (preferences.fleetOrder !== "name") {
+    const direction = preferences.fleetOrder === "newest" ? -1 : 1;
+    cars.sort((first, second) => {
+      if (first.year == null) return second.year == null ? 0 : 1;
+      if (second.year == null) return -1;
+      return (first.year - second.year) * direction;
+    });
+  }
   const withCovers = await Promise.all(
     cars.map(async (car) => {
       const photos = await listPhotos(car.id);
@@ -60,7 +69,7 @@ async function FleetContent({
       >
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={showArchived ? "/cars" : "/cars?archived=1"}
+            href={showArchived ? "/cars?archived=0" : "/cars?archived=1"}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-surface/60 px-3.5 py-2 text-xs font-medium text-muted backdrop-blur-md transition hover:border-accent hover:text-accent"
           >
             {showArchived ? "Hide archived" : "Show archived"}

@@ -1,5 +1,5 @@
 // Gallery page
-// Displays all photos across the fleet, sorted from oldest to newest.
+// Displays all photos across the fleet.
 
 // IMPORTS
 import { Suspense } from "react";
@@ -9,6 +9,8 @@ import { PageHero } from "@/components/PageHero";
 import { PhotoLightboxProvider, PhotoLightboxTrigger, PhotoSlideshowControls, PhotoThumbnail } from "@/components/PhotoLightbox";
 import { listAllPhotos, photoUrl } from "@/db/queries";
 import { isVideoFilename, videoPosterUrl } from "@/lib/media";
+import { getPreferences } from "@/lib/browser-preferences";
+import { requireFeature } from "@/lib/garage-settings";
 
 
 // DATE FORMATTER
@@ -31,7 +33,10 @@ export default function GalleryPage() {
 // GALLERY CONTENT
 // Fetches all photos and renders the gallery.
 async function GalleryContent() {
+  await requireFeature("gallery");
+  const { galleryOrder } = await getPreferences();
   const photos = await listAllPhotos();
+  if (galleryOrder === "newest") photos.reverse();
 
   return (
     <PhotoLightboxProvider
@@ -52,11 +57,11 @@ async function GalleryContent() {
           imageSrc="/images/bg-photos.jpg"
           imageAlt="Photography studio with automotive subject"
           title="Gallery"
-          subtitle="Every photo across the fleet, arranged from oldest to newest."
+          subtitle="Every photo across the fleet."
           kicker={
             <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-surface/80 px-4 py-1.5 backdrop-blur-md shadow-xl shadow-black/40">
               <span className="text-[11px] font-mono uppercase tracking-[0.22em] text-accent">
-                {photos.length} Item{photos.length !== 1 ? "s" : ""} · Oldest First
+                {photos.length} Item{photos.length !== 1 ? "s" : ""} · {galleryOrder === "newest" ? "Newest First" : "Oldest First"}
               </span>
             </span>
           }
@@ -132,7 +137,7 @@ function GalleryFallback() {
         imageSrc="/images/bg-photos.jpg"
         imageAlt="Photography studio with automotive subject"
         title="Gallery"
-        subtitle="Every photo across the fleet, arranged from oldest to newest."
+        subtitle="Every photo across the fleet."
       />
       <Card className="py-16 text-center">
         <p className="text-sm text-muted" role="status">Loading gallery...</p>

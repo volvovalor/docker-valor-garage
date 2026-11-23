@@ -12,6 +12,7 @@ import {
   uploadDiagramBackground,
 } from "@/actions/diagrams";
 import { CarNav } from "@/components/CarNav";
+import { requireFeature } from "@/lib/garage-settings";
 import { Button, Field, Input, Textarea } from "@/components/ui";
 import { WiringEditor } from "@/components/wiring/WiringEditor";
 import { getCar, getDiagram, listDiagrams, photoUrl } from "@/db/queries";
@@ -40,6 +41,7 @@ async function DiagramContent({
   params: Promise<{ id: string; diagramId: string }>;
 }) {
   const { id, diagramId } = await params;
+  await requireFeature("wiring");
   const car = await getCar(id);
   const diagram = await getDiagram(diagramId);
   if (!car || !diagram || diagram.carId !== id) notFound();

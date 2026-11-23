@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { projects } from "@/db/schema";
 import { newId } from "@/lib/ids";
+import { requireFeature } from "@/lib/garage-settings";
 
 
 // String Helper
@@ -27,6 +28,7 @@ function str(form: FormData, key: string) {
 // Validates required fields, generates a new ID, and inserts the project data into the database. 
 // After insertion, it revalidates the relevant paths and redirects to the newly created project's page.
 export async function createProject(form: FormData) {
+  await requireFeature("jobs");
   const carId = str(form, "carId");
   const title = str(form, "title");
   if (!carId || !title) throw new Error("Title is required.");
@@ -55,6 +57,7 @@ export async function createProject(form: FormData) {
 // Validates required fields, updates the project data, and revalidates the relevant paths. 
 // After updating, it redirects to the updated project's page.
 export async function updateProject(form: FormData) {
+  await requireFeature("jobs");
   const id = str(form, "id");
   const carId = str(form, "carId");
   const title = str(form, "title");
@@ -81,6 +84,7 @@ export async function updateProject(form: FormData) {
 // Deletes a project entry from the database. 
 // Removes the project, revalidates the relevant paths, and redirects to the jobs page of the car.
 export async function deleteProject(carId: string, projectId: string) {
+  await requireFeature("jobs");
   const db = getDb();
   await db.delete(projects).where(eq(projects.id, projectId));
   revalidatePath(`/cars/${carId}/jobs`);
